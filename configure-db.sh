@@ -21,8 +21,18 @@ if [ $DBSTATUS -ne 0 ] OR [ $ERRCODE -ne 0 ]; then
 	exit 1
 fi
 
-# Run the setup script to create the DB and the schema in the DB
 
-/opt/mssql-tools/bin/sqlcmd -S db -U sa -P $SA_PASSWORD -d master -i setup.sql &
-/opt/mssql-tools/bin/sqlcmd -S db -U sa -P $SA_PASSWORD -d master -i create_database.sql &
+for i in {1..50};
+do
+    /opt/mssql-tools/bin/sqlcmd -S db -U sa -P $SA_PASSWORD -d master -i create_database.sql 
+    if [ $? -eq 0 ]
+    then
+        echo "setup completed"
+        break
+    else
+        echo "not ready yet..."
+        sleep 1
+    fi
+done
+
 /opt/mssql-tools/bin/sqlcmd -S db -U sa -P $SA_PASSWORD -d master -i insert_sample_data.sql
